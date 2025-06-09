@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ModernTimePicker } from "./modern-time-picker"
 import { SimpleToggle } from "./simple-toggle"
-import { X, Play, CircleStopIcon as Stop } from "lucide-react"
+import { X, Play, Square } from "lucide-react"
 import type { Alarm } from "../types/alarm"
 
 interface EditAlarmModalProps {
@@ -172,7 +172,7 @@ export function EditAlarmModal({ alarm, isOpen, onClose, onSave, isDarkMode, cus
                     onClick={() => playPreview(soundOption)}
                     className="h-8 w-8"
                   >
-                    {isPlaying === soundOption ? <Stop className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    {isPlaying === soundOption ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   </Button>
                 </div>
               ))}
@@ -201,7 +201,7 @@ export function EditAlarmModal({ alarm, isOpen, onClose, onSave, isDarkMode, cus
                     onClick={() => playPreview(fileName)}
                     className="h-8 w-8"
                   >
-                    {isPlaying === fileName ? <Stop className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    {isPlaying === fileName ? <Square className="h-4 w-4" /> : <Play className="h-4 w-4" />}
                   </Button>
                 </div>
               ))}
