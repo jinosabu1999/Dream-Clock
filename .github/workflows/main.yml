@@ -38,12 +38,12 @@ jobs:
         npm run build
         echo "Build completed"
       
-    - name: Install Capacitor CLI and Android platform
+    - name: Install Capacitor dependencies
       run: |
-        echo "Installing Capacitor CLI and Android platform..."
+        echo "Installing all Capacitor dependencies..."
         npm install -g @capacitor/cli
-        npm install @capacitor/android --legacy-peer-deps
-        echo "Capacitor CLI and Android platform installed"
+        npm install @capacitor/core @capacitor/android --legacy-peer-deps
+        echo "All Capacitor dependencies installed"
       
     - name: Add Android platform
       run: |
