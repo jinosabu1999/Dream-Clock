@@ -19,8 +19,8 @@ export function ClockDisplay({ isDarkMode }: ClockDisplayProps) {
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString("en-US", {
-      hour12: false,
-      hour: "2-digit",
+      hour12: true,
+      hour: "numeric",
       minute: "2-digit",
     })
   }
@@ -60,7 +60,7 @@ export function ClockDisplay({ isDarkMode }: ClockDisplayProps) {
           }`}
         >
           {formatTime(time)}
-          <span className={`text-3xl md:text-4xl ml-2 ${isDarkMode ? "text-slate-300" : "text-slate-500"}`}>
+          <span className={`text-2xl md:text-3xl ml-2 ${isDarkMode ? "text-slate-300" : "text-slate-500"}`}>
             {formatSeconds(time)}
           </span>
         </div>

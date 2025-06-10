@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { MathChallenge } from "./math-challenge"
-import { Volume2, VolumeX, RotateCcw } from "lucide-react"
+import { Volume2, VolumeX, RotateCcw, X } from "lucide-react"
 import type { Alarm, AlarmSettings } from "../types/alarm"
 
 interface NotificationHandlerProps {
@@ -26,15 +26,66 @@ export function NotificationHandler({
   const [showMathChallenge, setShowMathChallenge] = useState(false)
   const [audioController, setAudioController] = useState<any>(null)
   const [isMuted, setIsMuted] = useState(false)
+  const [showPermissionBanner, setShowPermissionBanner] = useState(false)
 
   useEffect(() => {
-    // Request notification permission
+    // Check notification permission
     if ("Notification" in window) {
-      Notification.requestPermission().then((permission) => {
-        setNotificationPermission(permission)
-      })
+      setNotificationPermission(Notification.permission)
+
+      if (Notification.permission === "default") {
+        // Show permission banner after a short delay
+        setTimeout(() => setShowPermissionBanner(true), 2000)
+      } else if (Notification.permission === "granted") {
+        // Test notification
+        setTimeout(() => {
+          new Notification("Dream Clock Ready! 🔔", {
+            body: "Notifications are enabled. Your alarms will work in the background.",
+            icon: "/icon-192x192.png",
+            silent: true,
+            tag: "permission-granted",
+          })
+        }, 1000)
+      }
+    }
+
+    // Register service worker with error handling
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((registration) => {
+          console.log("Service Worker registered for background alarms")
+
+          // Send alarm data to service worker
+          navigator.serviceWorker.ready.then((swRegistration) => {
+            swRegistration.active?.postMessage({
+              type: "UPDATE_ALARMS",
+              alarms: alarms,
+            })
+          })
+        })
+        .catch((error) => {
+          console.warn("Service Worker registration failed:", error)
+          // Continue without service worker - alarms will still work when app is open
+        })
     }
   }, [])
+
+  // Update service worker with latest alarms
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.ready
+        .then((registration) => {
+          registration.active?.postMessage({
+            type: "UPDATE_ALARMS",
+            alarms: alarms,
+          })
+        })
+        .catch(() => {
+          // Ignore service worker errors
+        })
+    }
+  }, [alarms])
 
   useEffect(() => {
     const checkAlarms = () => {
@@ -42,45 +93,53 @@ export function NotificationHandler({
       const currentTime = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
       const currentDay = now.toLocaleDateString("en-US", { weekday: "long" })
 
-      console.log("Checking alarms at:", currentTime, "on", currentDay) // Debug log
+      console.log("Checking alarms at:", currentTime, "on", currentDay)
 
       alarms.forEach((alarm) => {
-        console.log("Alarm:", alarm.time, "Enabled:", alarm.enabled, "Days:", alarm.days) // Debug log
-
         if (
           alarm.enabled &&
           alarm.time === currentTime &&
           alarm.days.includes(currentDay) &&
           !activeAlarm &&
-          now.getSeconds() === 0 // Only trigger at the exact minute
+          now.getSeconds() === 0
         ) {
-          console.log("Triggering alarm:", alarm.id) // Debug log
+          console.log("Triggering alarm:", alarm.id)
           triggerAlarm(alarm)
         }
       })
     }
 
-    // Check every second, but only trigger at exact minute
     const interval = setInterval(checkAlarms, 1000)
     return () => clearInterval(interval)
   }, [alarms, activeAlarm])
 
   const triggerAlarm = (alarm: Alarm) => {
-    console.log("Alarm triggered:", alarm) // Debug log
+    console.log("Alarm triggered:", alarm)
     setActiveAlarm(alarm)
     setShowMathChallenge(false)
 
-    // Show notification
+    // Show browser notification
     if (notificationPermission === "granted") {
-      new Notification(`🔔 ${alarm.label || "Alarm"}`, {
-        body: `Time: ${alarm.time} - ${settings.mathChallenge ? "Solve math to dismiss!" : "Tap to dismiss"}`,
-        icon: "/icon-192x192.png",
-        tag: alarm.id,
-        requireInteraction: true,
-      })
+      try {
+        const notification = new Notification(`🔔 ${alarm.label || "Alarm"}`, {
+          body: `Time: ${formatTime(alarm.time)} - ${settings.mathChallenge ? "Solve math to dismiss!" : "Tap to dismiss"}`,
+          icon: "/icon-192x192.png",
+          badge: "/icon-192x192.png",
+          tag: alarm.id,
+          requireInteraction: true,
+          silent: false,
+        })
+
+        notification.onclick = () => {
+          window.focus()
+          notification.close()
+        }
+      } catch (error) {
+        console.warn("Failed to show notification:", error)
+      }
     }
 
-    // Trigger vibration
+    // Trigger vibration pattern
     if (settings.vibrationEnabled && alarm.vibrate && "vibrate" in navigator) {
       const vibrationPattern = [1000, 500, 1000, 500, 1000, 500, 1000]
       navigator.vibrate(vibrationPattern)
@@ -97,6 +156,13 @@ export function NotificationHandler({
 
     // Play alarm sound
     playAlarmSound(alarm)
+
+    // Wake lock to prevent device sleep
+    if ("wakeLock" in navigator) {
+      navigator.wakeLock.request("screen").catch((err) => {
+        console.log("Wake lock request failed:", err)
+      })
+    }
   }
 
   const playAlarmSound = (alarm: Alarm) => {
@@ -106,7 +172,6 @@ export function NotificationHandler({
     const volume = (settings.volume / 100) * (isMuted ? 0 : 1)
     let controller
 
-    // Check if it's a custom audio file
     if (customAudioFiles[alarm.sound || ""]) {
       controller = audioManager.playCustomSound(
         customAudioFiles[alarm.sound || ""],
@@ -114,7 +179,6 @@ export function NotificationHandler({
         settings.gradualVolumeIncrease,
       )
     } else {
-      // Use predefined sound
       controller = audioManager.playPredefinedSound(
         alarm.sound || "Gentle Wake",
         volume,
@@ -154,15 +218,26 @@ export function NotificationHandler({
     setActiveAlarm(null)
     setShowMathChallenge(false)
 
-    // Stop audio
     if (audioController) {
       audioController.stop()
       setAudioController(null)
     }
 
-    // Stop vibration
     if ("vibrate" in navigator) {
       navigator.vibrate(0)
+    }
+
+    // Clear all notifications
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.ready
+        .then((registration) => {
+          registration.getNotifications().then((notifications) => {
+            notifications.forEach((notification) => notification.close())
+          })
+        })
+        .catch(() => {
+          // Ignore errors
+        })
     }
   }
 
@@ -173,8 +248,6 @@ export function NotificationHandler({
     }
   }
 
-  if (!activeAlarm) return null
-
   const formatTime = (time: string) => {
     const [hours, minutes] = time.split(":")
     const hour = Number.parseInt(hours)
@@ -183,12 +256,79 @@ export function NotificationHandler({
     return `${displayHour}:${minutes} ${ampm}`
   }
 
+  const requestNotificationPermission = async () => {
+    if ("Notification" in window) {
+      const permission = await Notification.requestPermission()
+      setNotificationPermission(permission)
+      setShowPermissionBanner(false)
+
+      if (permission === "granted") {
+        new Notification("Dream Clock Ready! 🔔", {
+          body: "Notifications are enabled. Your alarms will work in the background.",
+          icon: "/icon-192x192.png",
+          silent: true,
+          tag: "permission-granted",
+        })
+      }
+    }
+  }
+
+  // Show notification permission banner
+  if (showPermissionBanner && (notificationPermission === "denied" || notificationPermission === "default")) {
+    return (
+      <div className="fixed top-4 left-4 right-4 z-50">
+        <div
+          className={`max-w-sm mx-auto p-4 rounded-2xl border shadow-lg backdrop-blur-sm ${
+            document.documentElement.classList.contains("dark")
+              ? "bg-slate-800/95 border-slate-700 text-white"
+              : "bg-white/95 border-gray-200 text-slate-800"
+          }`}
+        >
+          <div className="flex items-start gap-3">
+            <div className="text-xl">🔔</div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-sm">Enable Notifications</h3>
+              <p className="text-xs opacity-75 mt-1">Get alarm alerts even when the app is closed</p>
+              <div className="flex gap-2 mt-3">
+                <Button
+                  onClick={requestNotificationPermission}
+                  size="sm"
+                  className="h-8 px-3 text-xs bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+                >
+                  Enable
+                </Button>
+                <Button
+                  onClick={() => setShowPermissionBanner(false)}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-3 text-xs rounded-lg"
+                >
+                  Later
+                </Button>
+              </div>
+            </div>
+            <Button
+              onClick={() => setShowPermissionBanner(false)}
+              variant="ghost"
+              size="icon"
+              className="h-6 w-6 rounded-full flex-shrink-0"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Show alarm popup when alarm is active
+  if (!activeAlarm) return null
+
   return (
     <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 text-center max-w-sm w-full shadow-2xl border border-white/20">
         {!showMathChallenge ? (
           <>
-            {/* Alarm Header */}
             <div className="mb-6">
               <div className="text-6xl mb-4 animate-bounce">⏰</div>
               <h2 className="text-2xl font-bold mb-2 dark:text-white">{activeAlarm.label || "Wake Up!"}</h2>
@@ -200,14 +340,12 @@ export function NotificationHandler({
               </p>
             </div>
 
-            {/* Audio Controls */}
             <div className="flex justify-center mb-6">
               <Button onClick={toggleMute} variant="outline" size="icon" className="rounded-full">
                 {isMuted ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
               </Button>
             </div>
 
-            {/* Action Buttons */}
             <div className="space-y-3">
               <Button
                 onClick={handleDismiss}
@@ -225,7 +363,6 @@ export function NotificationHandler({
               </Button>
             </div>
 
-            {/* Fun motivational messages */}
             <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-slate-700 dark:to-slate-600 rounded-2xl">
               <p className="text-sm dark:text-slate-300 text-slate-600">
                 {

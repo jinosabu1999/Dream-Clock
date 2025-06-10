@@ -20,8 +20,8 @@ interface AddAlarmViewProps {
   onAddCustomAudio: (name: string, audioUrl: string) => void
 }
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
-const SHORT_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 export function AddAlarmView({ onBack, onAdd, isDarkMode, customAudioFiles, onAddCustomAudio }: AddAlarmViewProps) {
   const [hours, setHours] = useState(7)
@@ -401,15 +401,16 @@ export function AddAlarmView({ onBack, onAdd, isDarkMode, customAudioFiles, onAd
               <h3 className={`font-medium ${isDarkMode ? "text-white" : "text-slate-800"}`}>Repeat on</h3>
             </div>
 
-            <div className="grid grid-cols-7 gap-2">
-              {DAYS.map((day, index) => (
+            {/* Days in 2 rows starting with Sunday */}
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              {DAYS.slice(0, 4).map((day, index) => (
                 <Button
                   key={day}
                   type="button"
                   variant={days.includes(day) ? "default" : "outline"}
                   size="sm"
                   onClick={() => toggleDay(day)}
-                  className={`h-12 ${
+                  className={`h-12 text-sm font-medium ${
                     days.includes(day)
                       ? isDarkMode
                         ? "bg-purple-600 hover:bg-purple-700"
@@ -419,13 +420,34 @@ export function AddAlarmView({ onBack, onAdd, isDarkMode, customAudioFiles, onAd
                         : "border-gray-300"
                   }`}
                 >
-                  {SHORT_DAYS[index].slice(0, 1)}
-                  <span className="sr-only">{day}</span>
+                  {SHORT_DAYS[index]}
+                </Button>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {DAYS.slice(4).map((day, index) => (
+                <Button
+                  key={day}
+                  type="button"
+                  variant={days.includes(day) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleDay(day)}
+                  className={`h-12 text-sm font-medium ${
+                    days.includes(day)
+                      ? isDarkMode
+                        ? "bg-purple-600 hover:bg-purple-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                      : isDarkMode
+                        ? "border-slate-600 text-slate-300"
+                        : "border-gray-300"
+                  }`}
+                >
+                  {SHORT_DAYS[index + 4]}
                 </Button>
               ))}
             </div>
 
-            <div className="flex flex-wrap gap-2 mt-3">
+            <div className="flex flex-wrap gap-2 mt-4">
               <Button
                 type="button"
                 variant="outline"
@@ -468,7 +490,7 @@ export function AddAlarmView({ onBack, onAdd, isDarkMode, customAudioFiles, onAd
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => setDays(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])}
+                onClick={() => setDays(["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"])}
                 className={`text-xs ${
                   days.length === 7
                     ? isDarkMode

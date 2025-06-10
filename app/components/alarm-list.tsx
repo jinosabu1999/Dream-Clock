@@ -1,8 +1,9 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { SimpleToggle } from "./simple-toggle"
 import { Trash2, Edit3, Volume2, Vibrate, Music } from "lucide-react"
 import type { Alarm, AlarmSettings } from "../types/alarm"
 import { EditAlarmModal } from "./edit-alarm-modal"
@@ -47,6 +48,13 @@ export function AlarmList({
     return days.map((day) => day.slice(0, 3)).join(", ")
   }
 
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (confirm("Are you sure you want to delete this alarm?")) {
+      onDelete(id)
+    }
+  }
+
   if (alarms.length === 0) {
     return (
       <div
@@ -71,20 +79,20 @@ export function AlarmList({
       {alarms.map((alarm, index) => (
         <div
           key={alarm.id}
-          className={`p-4 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-[1.02] ${
+          className={`p-6 rounded-3xl backdrop-blur-sm border transition-all duration-300 hover:scale-[1.02] ${
             isDarkMode ? "bg-slate-800/30 border-slate-700/50" : "bg-white/50 border-white/50"
           } ${alarm.enabled ? "shadow-lg ring-2 ring-blue-500/20" : "opacity-60"}`}
           style={{ animationDelay: `${index * 0.1}s` }}
         >
           <div className="flex items-center justify-between">
             <div className="flex-1">
-              <div className={`text-2xl font-semibold ${isDarkMode ? "text-white" : "text-slate-800"}`}>
+              <div className={`text-3xl font-bold ${isDarkMode ? "text-white" : "text-slate-800"}`}>
                 {formatTime(alarm.time)}
                 {alarm.snoozed && (
                   <span className="ml-2 text-sm bg-yellow-500 text-white px-2 py-1 rounded-full">Snoozed</span>
                 )}
               </div>
-              <div className={`text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+              <div className={`text-sm mt-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
                 {getDaysText(alarm.days)}
               </div>
               {alarm.label && (
@@ -92,7 +100,7 @@ export function AlarmList({
                   {alarm.label}
                 </div>
               )}
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center gap-3 mt-3">
                 {alarm.sound && (
                   <div
                     className={`flex items-center gap-1 text-xs px-2 py-1 rounded-full ${
@@ -130,7 +138,7 @@ export function AlarmList({
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="icon"
@@ -139,24 +147,18 @@ export function AlarmList({
                   isDarkMode ? "text-slate-400 hover:bg-slate-700" : "text-slate-500 hover:bg-white/50"
                 }`}
               >
-                <Edit3 className="h-4 w-4" />
+                <Edit3 className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => onDelete(alarm.id)}
+                onClick={(e) => handleDelete(alarm.id, e)}
                 className={`rounded-full transition-all duration-200 hover:scale-110 ${
                   isDarkMode ? "text-red-400 hover:bg-red-900/30" : "text-red-500 hover:bg-red-50"
                 }`}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-5 w-5" />
               </Button>
-              <SimpleToggle
-                checked={alarm.enabled}
-                onCheckedChange={() => onToggle(alarm.id)}
-                isDarkMode={isDarkMode}
-                size="lg"
-              />
             </div>
           </div>
         </div>

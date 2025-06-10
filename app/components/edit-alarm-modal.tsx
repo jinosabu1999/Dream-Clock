@@ -20,7 +20,8 @@ interface EditAlarmModalProps {
   customAudioFiles: { [key: string]: string }
 }
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+const SHORT_DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
 const predefinedSounds = [
   "Gentle Wake",
@@ -121,8 +122,9 @@ export function EditAlarmModal({ alarm, isOpen, onClose, onSave, isDarkMode, cus
 
           <div>
             <Label className={isDarkMode ? "text-slate-200" : "text-slate-700"}>Repeat on</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              {DAYS.map((day) => (
+            {/* Days in 2 rows starting with Sunday */}
+            <div className="grid grid-cols-4 gap-2 mt-2 mb-2">
+              {DAYS.slice(0, 4).map((day, index) => (
                 <Button
                   key={day}
                   type="button"
@@ -139,7 +141,29 @@ export function EditAlarmModal({ alarm, isOpen, onClose, onSave, isDarkMode, cus
                         : "border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  {day.slice(0, 3)}
+                  {SHORT_DAYS[index]}
+                </Button>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {DAYS.slice(4).map((day, index) => (
+                <Button
+                  key={day}
+                  type="button"
+                  variant={days.includes(day) ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => toggleDay(day)}
+                  className={`transition-all duration-200 ${
+                    days.includes(day)
+                      ? isDarkMode
+                        ? "bg-purple-600 hover:bg-purple-700"
+                        : "bg-blue-600 hover:bg-blue-700"
+                      : isDarkMode
+                        ? "border-slate-600 text-slate-300 hover:bg-slate-700"
+                        : "border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  {SHORT_DAYS[index + 4]}
                 </Button>
               ))}
             </div>

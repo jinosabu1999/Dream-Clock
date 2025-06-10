@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { SimpleToggle } from "./simple-toggle"
-import { Upload, Trash2, Moon, Sun, Volume2, Vibrate, Brain, Clock, HardDrive, AlertTriangle } from "lucide-react"
+import { Upload, Trash2, Moon, Sun, Volume2, Brain, Clock, HardDrive, AlertTriangle } from "lucide-react"
 import { audioStorage } from "../utils/audio-storage"
 import type { AlarmSettings } from "../types/alarm"
 
@@ -144,14 +144,6 @@ export function SettingsView({
     }
   }
 
-  const testVibration = () => {
-    if ("vibrate" in navigator) {
-      navigator.vibrate([200, 100, 200])
-    } else {
-      alert("Vibration not supported on this device")
-    }
-  }
-
   return (
     <div className="space-y-6 mb-20">
       {/* Header */}
@@ -204,7 +196,7 @@ export function SettingsView({
         </div>
       </div>
 
-      {/* Audio Settings */}
+      {/* Audio & Vibration Settings */}
       <div
         className={`p-6 rounded-3xl backdrop-blur-sm border ${
           isDarkMode ? "bg-slate-800/30 border-slate-700/50" : "bg-white/40 border-white/50"
@@ -212,7 +204,9 @@ export function SettingsView({
       >
         <div className="flex items-center gap-3 mb-6">
           <Volume2 className={`h-5 w-5 ${isDarkMode ? "text-purple-400" : "text-blue-600"}`} />
-          <h3 className={`font-semibold text-lg ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Audio</h3>
+          <h3 className={`font-semibold text-lg ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
+            Audio & Vibration
+          </h3>
         </div>
 
         <div className="space-y-6">
@@ -265,43 +259,19 @@ export function SettingsView({
               />
             </div>
           )}
-        </div>
-      </div>
 
-      {/* Vibration Settings */}
-      <div
-        className={`p-6 rounded-3xl backdrop-blur-sm border ${
-          isDarkMode ? "bg-slate-800/30 border-slate-700/50" : "bg-white/40 border-white/50"
-        }`}
-      >
-        <div className="flex items-center gap-3 mb-6">
-          <Vibrate className={`h-5 w-5 ${isDarkMode ? "text-purple-400" : "text-blue-600"}`} />
-          <h3 className={`font-semibold text-lg ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>Vibration</h3>
-        </div>
-
-        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
+            <div>
               <Label className={isDarkMode ? "text-slate-200" : "text-slate-700"}>Vibration</Label>
               <p className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
                 Enable vibration for alarms
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={testVibration}
-                size="sm"
-                variant="outline"
-                className={`text-xs ${isDarkMode ? "border-slate-600 text-slate-300" : "border-gray-300"}`}
-              >
-                Test
-              </Button>
-              <SimpleToggle
-                checked={settings.vibrationEnabled}
-                onCheckedChange={(checked) => updateSetting("vibrationEnabled", checked)}
-                isDarkMode={isDarkMode}
-              />
-            </div>
+            <SimpleToggle
+              checked={settings.vibrationEnabled}
+              onCheckedChange={(checked) => updateSetting("vibrationEnabled", checked)}
+              isDarkMode={isDarkMode}
+            />
           </div>
         </div>
       </div>
@@ -524,7 +494,8 @@ export function SettingsView({
             }`}
           >
             <p className={`text-xs ${isDarkMode ? "text-purple-300" : "text-blue-700"}`}>
-              💡 Pro tip: Install this app on your home screen for the best experience and reliable offline alarms!
+              💡 Pro tip: Install this app on your home screen for the best experience and reliable background alarms!
+              Make sure to allow notifications for alarm alerts.
             </p>
           </div>
         </div>
