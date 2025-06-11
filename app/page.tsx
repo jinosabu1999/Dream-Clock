@@ -8,7 +8,7 @@ import { SettingsView } from "./components/settings-view"
 import { StopwatchView } from "./components/stopwatch-view"
 import { TimerView } from "./components/timer-view"
 import { WorldClockView } from "./components/world-clock-view"
-import { NotificationHandler } from "./components/notification-handler"
+import { EnhancedNotificationHandler } from "./components/enhanced-notification-handler"
 import { AudioManager } from "./components/audio-manager"
 import { BottomNavbar } from "./components/bottom-navbar"
 import { Button } from "@/components/ui/button"
@@ -30,6 +30,7 @@ export default function AlarmClockApp() {
     mathChallenge: true,
     challengeDifficulty: "easy",
     fadeInDuration: 30,
+    hapticFeedback: true,
   })
 
   useEffect(() => {
@@ -256,7 +257,6 @@ export default function AlarmClockApp() {
                 alarms={alarms}
                 onToggle={toggleAlarm}
                 onDelete={deleteAlarm}
-                onEdit={updateAlarm}
                 isDarkMode={isDarkMode}
                 settings={settings}
                 customAudioFiles={customAudioFiles}
@@ -302,8 +302,8 @@ export default function AlarmClockApp() {
         {/* Audio Manager */}
         <AudioManager customAudioFiles={customAudioFiles} />
 
-        {/* Notification Handler */}
-        <NotificationHandler
+        {/* Enhanced Notification Handler */}
+        <EnhancedNotificationHandler
           alarms={alarms}
           settings={settings}
           customAudioFiles={customAudioFiles}
