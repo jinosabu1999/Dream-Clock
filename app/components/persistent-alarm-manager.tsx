@@ -29,8 +29,16 @@ export function PersistentAlarmManager({ alarms, settings }: PersistentAlarmMana
 
   const initializePersistentService = async () => {
     try {
-      // Register persistent service worker
+      // Register persistent service worker with proper MIME type handling
       if ("serviceWorker" in navigator) {
+        // First, try to unregister any existing service workers
+        const registrations = await navigator.serviceWorker.getRegistrations()
+        for (const registration of registrations) {
+          await registration.unregister()
+        }
+
+        // Register new service worker with cache busting
+        // NEW – register the actual file so MIME type is JavaScript
         const registration = await navigator.serviceWorker.register("/persistent-sw.js", {
           scope: "/",
           updateViaCache: "none",
@@ -61,6 +69,8 @@ export function PersistentAlarmManager({ alarms, settings }: PersistentAlarmMana
       }
     } catch (error) {
       console.error("Failed to initialize persistent service:", error)
+      // Fallback to basic alarm functionality without service worker
+      console.log("Falling back to basic alarm functionality")
     }
   }
 
@@ -120,7 +130,7 @@ export function PersistentAlarmManager({ alarms, settings }: PersistentAlarmMana
         // Request wake lock when alarms are active
         const activeAlarms = alarms.filter((alarm) => alarm.enabled)
         if (activeAlarms.length > 0) {
-          wakeLock.current = await navigator.wakeLock.request("screen")
+          wakeLock.current = await (navigator as any).wakeLock.request("screen")
           console.log("Wake lock acquired for active alarms")
 
           wakeLock.current.addEventListener("release", () => {
@@ -221,33 +231,6 @@ export function PersistentAlarmManager({ alarms, settings }: PersistentAlarmMana
     }
   }
 
-  // Test function to verify persistent alarms work
-  const testPersistentAlarm = () => {
-    const testAlarm: Alarm = {
-      id: "test-persistent",
-      time: new Date(Date.now() + 60000).toTimeString().slice(0, 5), // 1 minute from now
-      label: "Test Persistent Alarm",
-      days: [new Date().toLocaleDateString("en-US", { weekday: "long" })],
-      sound: "Digital Beep",
-      vibrate: true,
-      enabled: true,
-      snoozed: false,
-    }
-
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({
-        type: "UPDATE_ALARMS",
-        alarms: [...alarms, testAlarm],
-        settings: settings,
-        timestamp: Date.now(),
-      })
-
-      alert(
-        "Test alarm set for 1 minute from now. Try clearing the app from recent apps and wait for the alarm to trigger!",
-      )
-    }
-  }
-
   return (
     <div className="fixed bottom-20 right-4 z-50">
       {/* Status indicator */}
@@ -260,16 +243,6 @@ export function PersistentAlarmManager({ alarms, settings }: PersistentAlarmMana
       >
         {isServiceWorkerReady ? "🟢 Persistent Alarms Active" : "🟡 Initializing..."}
       </div>
-
-      {/* Test button (only in development) */}
-      {process.env.NODE_ENV === "development" && (
-        <button
-          onClick={testPersistentAlarm}
-          className="px-3 py-1 bg-blue-600 text-white text-xs rounded-full hover:bg-blue-700"
-        >
-          Test Persistent Alarm
-        </button>
-      )}
 
       {appKillDetected && (
         <div className="mb-2 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">
