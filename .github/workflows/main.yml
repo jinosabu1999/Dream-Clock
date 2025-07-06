@@ -2,10 +2,19 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+        - debug
+        - release
 
 jobs:
   build:
@@ -15,64 +24,132 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Set up JDK 21
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '21'
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
+        java-version: '17'
         
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+      
     - name: Install dependencies
       run: |
-        echo "Installing dependencies with legacy peer deps..."
         npm install --legacy-peer-deps
-        echo "Dependencies installed"
-      
+        npm install @capacitor/core @capacitor/cli @capacitor/android --save --legacy-peer-deps
+        
     - name: Build Next.js app
-      run: |
-        echo "Building Next.js app..."
-        npm run build
-        echo "Build completed"
-      
-    - name: Install Capacitor dependencies
-      run: |
-        echo "Installing all Capacitor dependencies..."
-        npm install -g @capacitor/cli
-        npm install @capacitor/core @capacitor/android --legacy-peer-deps
-        echo "All Capacitor dependencies installed"
+      run: npm run build
       
     - name: Add Android platform
-      run: |
-        echo "Adding Android platform..."
-        npx cap add android
-        echo "Android platform added"
+      run: npx cap add android
       
     - name: Sync Capacitor
-      run: |
-        echo "Syncing Capacitor..."
-        npx cap sync android
-        echo "Capacitor synced"
+      run: npx cap sync android
       
-    - name: Make gradlew executable
+    - name: Build Debug APK
+      if: github.event.inputs.release_type == 'debug' || github.event.inputs.release_type == ''
       run: |
-        echo "Making gradlew executable..."
-        chmod +x android/gradlew
-        echo "gradlew is now executable"
-      
-    - name: Build debug APK
-      run: |
-        echo "Building debug APK..."
         cd android
+        chmod +x gradlew
         ./gradlew assembleDebug
-        echo "APK build completed"
         
-    - name: Upload APK
+    - name: Build Release APK
+      if: github.event.inputs.release_type == 'release' || github.ref == 'refs/heads/main'
+      run: |
+        cd android
+        chmod +x gradlew
+        ./gradlew assembleRelease
+        
+    - name: Upload Debug APK
+      if: github.event.inputs.release_type == 'debug' || github.event.inputs.release_type == ''
       uses: actions/upload-artifact@v4
       with:
-        name: dream-clock-debug-apk
+        name: dream-clock-debug-${{ github.run_number }}
         path: android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
+        
+    - name: Upload Release APK
+      if: github.event.inputs.release_type == 'release' || github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: dream-clock-release-${{ github.run_number }}
+        path: android/app/build/outputs/apk/release/app-release.apk
+        retention-days: 90
+        
+    - name: Create Release
+      if: github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v1.0.${{ github.run_number }}
+        name: Dream Clock v1.0.${{ github.run_number }}
+        body: |
+          ## 🚀 Dream Clock - Persistent Alarm App
+          
+          ### ✅ Features in this release:
+          - ⏰ **Persistent Alarms**: Work even when app is cleared from recent apps
+          - 🔔 **Native Notifications**: Full Android notification integration
+          - 🔋 **Background Service**: Keeps alarms active in background
+          - 📱 **Material 3 Design**: Modern, beautiful interface
+          - 🎵 **Custom Ringtones**: Upload your own alarm sounds
+          - 🧮 **Math Challenge**: Solve math problems to dismiss alarms
+          - 🌙 **Dark Mode**: Eye-friendly dark theme
+          - ⏱️ **Stopwatch & Timer**: Additional time utilities
+          - 🌍 **World Clock**: Multiple timezone support
+          
+          ### 📱 Installation:
+          1. Download the APK file below
+          2. Enable "Install from Unknown Sources" in Android settings
+          3. Install the APK
+          4. Grant notification and background app permissions
+          5. Disable battery optimization for the app (recommended)
+          
+          ### 🔧 Permissions Required:
+          - **Notifications**: For alarm alerts
+          - **Background App Refresh**: To keep alarms active
+          - **Storage**: For custom ringtones
+          - **Vibration**: For alarm vibration
+          
+          **Note**: For best reliability, disable battery optimization for this app in your Android settings.
+        files: |
+          android/app/build/outputs/apk/release/app-release.apk
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Comment on PR with APK
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 📱 APK Build Complete!
+            
+            Your Dream Clock APK has been built successfully! 
+            
+            **Download**: Check the "Artifacts" section above to download the APK.
+            
+            ### 🧪 Testing Instructions:
+            1. Install the APK on your Android device
+            2. Set up a test alarm for 2-3 minutes from now
+            3. Clear the app from recent apps
+            4. Wait for the alarm to trigger
+            5. Verify you receive the notification with snooze/dismiss buttons
+            
+            ### ✅ Expected Behavior:
+            - Alarm should trigger even when app is cleared
+            - Notification should appear with action buttons
+            - Background service should keep alarms active
+            - Persistent storage should survive app restarts`
+          })
+          
