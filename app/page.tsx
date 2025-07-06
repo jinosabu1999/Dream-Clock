@@ -9,12 +9,14 @@ import { StopwatchView } from "./components/stopwatch-view"
 import { TimerView } from "./components/timer-view"
 import { WorldClockView } from "./components/world-clock-view"
 import { EnhancedNotificationHandler } from "./components/enhanced-notification-handler"
+import { PersistentAlarmManager } from "./components/persistent-alarm-manager"
+import { NativeAlarmBridge } from "./components/native-alarm-bridge"
 import { AudioManager } from "./components/audio-manager"
 import { BottomNavbar } from "./components/bottom-navbar"
 import { Button } from "@/components/ui/button"
-import { Plus, Sparkles, Moon, Sun } from "lucide-react"
+import { Plus, Sparkles, Moon, Sun, Shield } from "lucide-react"
 import { audioStorage } from "./utils/audio-storage"
-import type { Alarm, AlarmSettings } from "./types/alarm"
+import type { Alarm, AlarmSettings } from "../types/alarm"
 
 export default function AlarmClockApp() {
   const [alarms, setAlarms] = useState<Alarm[]>([])
@@ -22,6 +24,7 @@ export default function AlarmClockApp() {
   const [isDarkMode, setIsDarkMode] = useState(false)
   const [activeView, setActiveView] = useState("home")
   const [customAudioFiles, setCustomAudioFiles] = useState<{ [key: string]: string }>({})
+  const [isPersistentMode, setIsPersistentMode] = useState(false)
   const [settings, setSettings] = useState<AlarmSettings>({
     defaultSnoozeTime: 5,
     vibrationEnabled: true,
@@ -51,7 +54,22 @@ export default function AlarmClockApp() {
 
     // Load audio files from IndexedDB
     loadAudioFiles()
+
+    // Initialize persistent mode
+    initializePersistentMode()
   }, [])
+
+  const initializePersistentMode = () => {
+    // Check if we're in a context that supports persistent alarms
+    const supportsPersistent = "serviceWorker" in navigator && "Notification" in window && "indexedDB" in window
+
+    if (supportsPersistent) {
+      setIsPersistentMode(true)
+      console.log("✅ Persistent alarm mode enabled")
+    } else {
+      console.warn("⚠️ Persistent alarms not fully supported in this environment")
+    }
+  }
 
   const loadAudioFiles = async () => {
     try {
@@ -193,7 +211,15 @@ export default function AlarmClockApp() {
                 >
                   <Sparkles className="h-6 w-6 text-white" />
                 </div>
-                <h1 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-slate-800"}`}>Dream Clock</h1>
+                <div>
+                  <h1 className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-slate-800"}`}>Dream Clock</h1>
+                  {isPersistentMode && (
+                    <div className="flex items-center gap-1 mt-1">
+                      <Shield className="h-3 w-3 text-green-500" />
+                      <span className="text-xs text-green-500 font-medium">Persistent Mode</span>
+                    </div>
+                  )}
+                </div>
               </div>
               <Button
                 variant="ghost"
@@ -208,6 +234,25 @@ export default function AlarmClockApp() {
                 {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
               </Button>
             </div>
+
+            {/* Persistent Mode Banner */}
+            {isPersistentMode && alarms.filter((a) => a.enabled).length > 0 && (
+              <div
+                className={`mb-6 p-4 rounded-2xl border ${
+                  isDarkMode
+                    ? "bg-green-900/20 border-green-700/50 text-green-300"
+                    : "bg-green-50 border-green-200 text-green-700"
+                }`}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <Shield className="h-4 w-4" />
+                  <span className="font-semibold text-sm">Persistent Alarms Active</span>
+                </div>
+                <p className="text-xs opacity-90">
+                  Your alarms will work even when the app is cleared from recent apps or the phone is restarted.
+                </p>
+              </div>
+            )}
 
             {/* Clock Display */}
             <ClockDisplay isDarkMode={isDarkMode} />
@@ -320,6 +365,12 @@ export default function AlarmClockApp() {
           }}
           onDismiss={(id) => updateAlarm(id, { enabled: false, snoozed: false })}
         />
+
+        {/* Persistent Alarm Manager */}
+        {isPersistentMode && <PersistentAlarmManager alarms={alarms} settings={settings} />}
+
+        {/* Native Alarm Bridge for Capacitor apps */}
+        <NativeAlarmBridge alarms={alarms} settings={settings} />
       </div>
 
       {/* Bottom Navigation */}

@@ -1,7 +1,7 @@
 {
-  "name": "Dream Clock - Modern Alarm App",
+  "name": "Dream Clock - Persistent Alarm App",
   "short_name": "Dream Clock",
-  "description": "A beautiful, feature-rich alarm clock app with Material 3 design that works offline",
+  "description": "A persistent alarm clock app that works even when cleared from recent apps",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -30,5 +30,39 @@
       "type": "image/png",
       "form_factor": "narrow"
     }
-  ]
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Add Alarm",
+      "short_name": "Add Alarm",
+      "description": "Quickly add a new alarm",
+      "url": "/?action=add-alarm",
+      "icons": [
+        {
+          "src": "/icon-192x192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "share_target": {
+    "action": "/",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+alarm",
+      "url": "/?alarm=%s"
+    }
+  ],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  }
 }

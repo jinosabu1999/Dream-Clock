@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Dream Clock</string>
+    <string name="title_activity_main">Dream Clock</string>
+    <string name="package_name">com.dreamclock.persistent</string>
+    <string name="custom_url_scheme">com.dreamclock.persistent</string>
+    
+    <!-- Background service strings -->
+    <string name="background_service_title">Dream Clock Alarms</string>
+    <string name="background_service_text">Keeping your alarms active in background</string>
+    
+    <!-- Notification channel strings -->
+    <string name="alarm_channel_name">Alarm Notifications</string>
+    <string name="alarm_channel_description">Notifications for alarm alerts</string>
+    <string name="background_channel_name">Background Service</string>
+    <string name="background_channel_description">Background service for persistent alarms</string>
+    
+    <!-- Permission strings -->
+    <string name="notification_permission_title">Enable Notifications</string>
+    <string name="notification_permission_message">Dream Clock needs notification permission to show alarm alerts</string>
+    <string name="background_permission_title">Background App Refresh</string>
+    <string name="background_permission_message">Allow Dream Clock to run in background for persistent alarms</string>
+    <string name="battery_optimization_title">Battery Optimization</string>
+    <string name="battery_optimization_message">Disable battery optimization for Dream Clock to ensure alarms work reliably</string>
+</resources>
