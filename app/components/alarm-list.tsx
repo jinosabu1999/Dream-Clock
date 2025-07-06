@@ -4,7 +4,7 @@ import type React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Trash2, Volume2, Vibrate, Music, Clock, Calendar } from "lucide-react"
-import { MaterialToggle } from "./material-toggle"
+import { UnifiedToggle } from "./unified-toggle"
 import type { Alarm, AlarmSettings } from "../types/alarm"
 
 interface AlarmListProps {
@@ -130,7 +130,7 @@ export function AlarmList({ alarms, onToggle, onDelete, isDarkMode, settings, cu
             </div>
 
             <div className="flex flex-col items-end gap-3">
-              <MaterialToggle
+              <UnifiedToggle
                 checked={alarm.enabled}
                 onCheckedChange={() => onToggle(alarm.id)}
                 isDarkMode={isDarkMode}

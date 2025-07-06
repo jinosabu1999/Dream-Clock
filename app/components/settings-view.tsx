@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MaterialToggle } from "./material-toggle"
+import { UnifiedToggle } from "./unified-toggle"
 import { RingtoneSelector } from "./ringtone-selector"
 import {
   Upload,
@@ -210,7 +210,7 @@ export function SettingsView({
               Switch between light and dark themes
             </p>
           </div>
-          <MaterialToggle checked={isDarkMode} onCheckedChange={onToggleDarkMode} isDarkMode={isDarkMode} size="lg" />
+          <UnifiedToggle checked={isDarkMode} onCheckedChange={onToggleDarkMode} isDarkMode={isDarkMode} size="lg" />
         </div>
       </div>
 
@@ -252,7 +252,7 @@ export function SettingsView({
                 Slowly increase volume for gentle wake-up
               </p>
             </div>
-            <MaterialToggle
+            <UnifiedToggle
               checked={settings.gradualVolumeIncrease}
               onCheckedChange={(checked) => updateSetting("gradualVolumeIncrease", checked)}
               isDarkMode={isDarkMode}
@@ -285,7 +285,7 @@ export function SettingsView({
                 Enable vibration for alarms
               </p>
             </div>
-            <MaterialToggle
+            <UnifiedToggle
               checked={settings.vibrationEnabled}
               onCheckedChange={(checked) => updateSetting("vibrationEnabled", checked)}
               isDarkMode={isDarkMode}
@@ -332,7 +332,7 @@ export function SettingsView({
                 Solve math problems to dismiss alarms
               </p>
             </div>
-            <MaterialToggle
+            <UnifiedToggle
               checked={settings.mathChallenge}
               onCheckedChange={(checked) => updateSetting("mathChallenge", checked)}
               isDarkMode={isDarkMode}

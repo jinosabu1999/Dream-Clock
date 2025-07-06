@@ -9,8 +9,8 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft, Upload, AlertCircle, HardDrive, Clock, Calendar, Music, Vibrate } from "lucide-react"
 import { audioStorage } from "../utils/audio-storage"
-import { SimpleToggle } from "./simple-toggle"
 import type { Alarm } from "../types/alarm"
+import { UnifiedToggle } from "./unified-toggle"
 
 interface AddAlarmViewProps {
   onBack: () => void
@@ -609,7 +609,7 @@ export function AddAlarmView({ onBack, onAdd, isDarkMode, customAudioFiles, onAd
                 <Vibrate className={`h-5 w-5 ${isDarkMode ? "text-purple-400" : "text-blue-600"}`} />
                 <h3 className={`font-medium ${isDarkMode ? "text-white" : "text-slate-800"}`}>Vibration</h3>
               </div>
-              <SimpleToggle checked={vibrate} onCheckedChange={setVibrate} isDarkMode={isDarkMode} size="lg" />
+              <UnifiedToggle checked={vibrate} onCheckedChange={setVibrate} isDarkMode={isDarkMode} size="lg" />
             </div>
           </div>
         </div>

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ModernTimePicker } from "./modern-time-picker"
-import { SimpleToggle } from "./simple-toggle"
+import { UnifiedToggle } from "./unified-toggle"
 import { X, Play, Square } from "lucide-react"
 import type { Alarm } from "../types/alarm"
 
@@ -234,7 +234,7 @@ export function EditAlarmModal({ alarm, isOpen, onClose, onSave, isDarkMode, cus
 
           <div className="flex items-center justify-between">
             <Label className={isDarkMode ? "text-slate-200" : "text-slate-700"}>Vibration</Label>
-            <SimpleToggle checked={vibrate} onCheckedChange={setVibrate} isDarkMode={isDarkMode} size="lg" />
+            <UnifiedToggle checked={vibrate} onCheckedChange={setVibrate} isDarkMode={isDarkMode} size="lg" />
           </div>
 
           <div className="flex gap-3">

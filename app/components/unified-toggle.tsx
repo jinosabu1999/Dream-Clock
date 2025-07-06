@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 
-interface SimpleToggleProps {
+interface UnifiedToggleProps {
   checked: boolean
   onCheckedChange: (checked: boolean) => void
   isDarkMode: boolean
@@ -10,13 +10,13 @@ interface SimpleToggleProps {
   disabled?: boolean
 }
 
-export function SimpleToggle({
+export function UnifiedToggle({
   checked,
   onCheckedChange,
   isDarkMode,
   size = "md",
   disabled = false,
-}: SimpleToggleProps) {
+}: UnifiedToggleProps) {
   const [isChecked, setIsChecked] = useState(checked)
 
   useEffect(() => {
@@ -37,21 +37,21 @@ export function SimpleToggle({
   }
 
   const sizeClasses = {
-    sm: "w-8 h-5",
-    md: "w-10 h-6",
-    lg: "w-12 h-7",
+    sm: "w-9 h-5",
+    md: "w-11 h-6",
+    lg: "w-13 h-7",
   }
 
   const thumbSizeClasses = {
-    sm: "w-3 h-3",
-    md: "w-4 h-4",
-    lg: "w-5 h-5",
+    sm: "w-4 h-4",
+    md: "w-5 h-5",
+    lg: "w-6 h-6",
   }
 
   const translateClasses = {
-    sm: "translate-x-3",
-    md: "translate-x-4",
-    lg: "translate-x-5",
+    sm: "translate-x-4",
+    md: "translate-x-5",
+    lg: "translate-x-6",
   }
 
   return (
@@ -61,7 +61,7 @@ export function SimpleToggle({
       disabled={disabled}
       className={`
         ${sizeClasses[size]} 
-        relative inline-flex items-center rounded-full transition-all duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2
+        relative inline-flex items-center rounded-full transition-all duration-300 ease-out focus:outline-none focus:ring-2 focus:ring-offset-2
         ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
         ${
           isChecked
@@ -73,13 +73,20 @@ export function SimpleToggle({
               : "bg-gray-300 focus:ring-gray-400"
         }
         ${!disabled && "hover:scale-105 active:scale-95"}
+        shadow-sm
       `}
     >
-      {/* Track */}
+      {/* Track Background */}
       <span
         className={`
-          absolute inset-0 rounded-full transition-colors duration-200
-          ${isChecked ? "bg-blue-600" : isDarkMode ? "bg-slate-600" : "bg-gray-300"}
+          absolute inset-0 rounded-full transition-all duration-300
+          ${
+            isChecked
+              ? "bg-gradient-to-r from-blue-500 to-blue-600 shadow-inner"
+              : isDarkMode
+                ? "bg-gradient-to-r from-slate-600 to-slate-700"
+                : "bg-gradient-to-r from-gray-300 to-gray-400"
+          }
         `}
       />
 
@@ -87,21 +94,25 @@ export function SimpleToggle({
       <span
         className={`
           ${thumbSizeClasses[size]}
-          relative inline-block rounded-full bg-white shadow-sm transform transition-transform duration-200 ease-out
+          relative inline-block rounded-full bg-white shadow-lg transform transition-all duration-300 ease-out
           ${isChecked ? translateClasses[size] : "translate-x-0.5"}
           flex items-center justify-center
+          ${isChecked ? "shadow-lg shadow-blue-500/20" : "shadow-md"}
+          border border-gray-200/50
         `}
       >
-        {/* Material 3 Icon */}
+        {/* Material 3 Check Icon */}
         <svg
-          className={`w-2.5 h-2.5 transition-opacity duration-200 ${isChecked ? "opacity-100" : "opacity-0"}`}
+          className={`w-3 h-3 transition-all duration-300 ${
+            isChecked ? "opacity-100 scale-100" : "opacity-0 scale-75"
+          }`}
           viewBox="0 0 24 24"
           fill="none"
         >
           <path
             d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"
             fill={isChecked ? "#1976d2" : "transparent"}
-            className="transition-colors duration-200"
+            className="transition-colors duration-300"
           />
         </svg>
       </span>

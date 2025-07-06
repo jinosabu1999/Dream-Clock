@@ -46,19 +46,6 @@ const config: CapacitorConfig = {
       requestPermissions: true,
       presentationOptions: ["badge", "sound", "alert"],
     },
-    BackgroundMode: {
-      enabled: true,
-      title: "Dream Clock Alarms",
-      text: "Keeping your alarms active",
-      icon: "icon",
-      color: "6366f1",
-      resume: true,
-      silent: false,
-      hidden: false,
-    },
-    PushNotifications: {
-      presentationOptions: ["badge", "sound", "alert"],
-    },
     StatusBar: {
       style: "DARK",
       backgroundColor: "#6366f1",
@@ -67,9 +54,6 @@ const config: CapacitorConfig = {
       resize: "body",
       style: "DARK",
       resizeOnFullScreen: true,
-    },
-    Device: {
-      // For device info and permissions
     },
     App: {
       launchUrl: "com.dreamclock.persistent",

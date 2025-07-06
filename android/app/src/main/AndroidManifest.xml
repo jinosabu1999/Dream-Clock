@@ -13,19 +13,11 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
-    <!-- Background and foreground service permissions -->
+    <!-- Background service permissions -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    
-    <!-- Audio permissions for custom ringtones -->
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
         android:allowBackup="true"
@@ -78,11 +70,6 @@
             </intent-filter>
         </receiver>
 
-        <!-- Alarm receiver -->
-        <receiver android:name=".AlarmReceiver"
-            android:enabled="true"
-            android:exported="false" />
-
         <!-- Background service for persistent alarms -->
         <service android:name=".AlarmService"
             android:enabled="true"
@@ -92,28 +79,6 @@
                 android:value="alarm_clock" />
         </service>
 
-        <!-- Notification channels -->
-        <meta-data android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_stat_icon_config_sample" />
-        <meta-data android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/colorAccent" />
-        <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="alarm_channel" />
-
     </application>
-
-    <!-- Queries for Android 11+ -->
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="https" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="http" />
-        </intent>
-    </queries>
 
 </manifest>

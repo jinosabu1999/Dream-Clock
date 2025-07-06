@@ -60,7 +60,6 @@ dependencies {
     implementation project(':capacitor-keyboard')
     implementation project(':capacitor-status-bar')
     implementation project(':capacitor-local-notifications')
-    implementation project(':capacitor-background-mode')
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
